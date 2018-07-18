@@ -1,5 +1,6 @@
 package com.letsbuildthatapp.kotlinmessenger.messages
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -24,15 +25,11 @@ class NewMessageActivity : AppCompatActivity() {
 
     supportActionBar?.title = "Select User"
 
-//    val adapter = GroupAdapter<ViewHolder>()
-//
-//    adapter.add(UserItem())
-//    adapter.add(UserItem())
-//    adapter.add(UserItem())
-//
-//    recyclerview_newmessage.adapter = adapter
-
     fetchUsers()
+  }
+
+  companion object {
+    val USER_KEY = "USER_KEY"
   }
 
   private fun fetchUsers() {
@@ -48,6 +45,19 @@ class NewMessageActivity : AppCompatActivity() {
           if (user != null) {
             adapter.add(UserItem(user))
           }
+        }
+
+        adapter.setOnItemClickListener { item, view ->
+
+          val userItem = item as UserItem
+
+          val intent = Intent(view.context, ChatLogActivity::class.java)
+//          intent.putExtra(USER_KEY,  userItem.user.username)
+          intent.putExtra(USER_KEY, userItem.user)
+          startActivity(intent)
+
+          finish()
+
         }
 
         recyclerview_newmessage.adapter = adapter
