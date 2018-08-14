@@ -11,6 +11,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.letsbuildthatapp.kotlinmessenger.R
 import com.letsbuildthatapp.kotlinmessenger.models.ChatMessage
 import com.letsbuildthatapp.kotlinmessenger.models.User
+import com.letsbuildthatapp.kotlinmessenger.views.ChatFromItem
+import com.letsbuildthatapp.kotlinmessenger.views.ChatToItem
+import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
@@ -26,15 +29,17 @@ class ChatLogActivity : AppCompatActivity() {
 
   val adapter = GroupAdapter<ViewHolder>()
 
+  var toUser: User? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_chat_log)
 
     recyclerview_chat_log.adapter = adapter
 
-    val user = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
+    toUser = intent.getParcelableExtra<User>(NewMessageActivity.USER_KEY)
 
-    supportActionBar?.title = user.username
+    supportActionBar?.title = toUser?.username
 
 //    setupDummyData()
     listenForMessages()
@@ -57,9 +62,10 @@ class ChatLogActivity : AppCompatActivity() {
           Log.d(TAG, chatMessage.text)
 
           if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
-            adapter.add(ChatFromItem(chatMessage.text))
+            val currentUser = LatestMessagesActivity.currentUser ?: return
+            adapter.add(ChatFromItem(chatMessage.text, currentUser))
           } else {
-            adapter.add(ChatToItem(chatMessage.text))
+            adapter.add(ChatToItem(chatMessage.text, toUser!!))
           }
         }
 
@@ -102,38 +108,5 @@ class ChatLogActivity : AppCompatActivity() {
         .addOnSuccessListener {
           Log.d(TAG, "Saved our chat message: ${reference.key}")
         }
-  }
-
-  private fun setupDummyData() {
-    val adapter = GroupAdapter<ViewHolder>()
-
-    adapter.add(ChatFromItem("FROM MESSSSSSSSAAGE"))
-    adapter.add(ChatToItem("TO MESSAGE\nTOMESSAGE"))
-    adapter.add(ChatFromItem("FROM MESSSSSSSSAAGE"))
-    adapter.add(ChatToItem("TO MESSAGE\nTOMESSAGE"))
-    adapter.add(ChatFromItem("FROM MESSSSSSSSAAGE"))
-    adapter.add(ChatToItem("TO MESSAGE\nTOMESSAGE"))
-
-    recyclerview_chat_log.adapter = adapter
-  }
-}
-
-class ChatFromItem(val text: String): Item<ViewHolder>() {
-  override fun bind(viewHolder: ViewHolder, position: Int) {
-    viewHolder.itemView.textview_from_row.text = text
-  }
-
-  override fun getLayout(): Int {
-    return R.layout.chat_from_row
-  }
-}
-
-class ChatToItem(val text: String): Item<ViewHolder>() {
-  override fun bind(viewHolder: ViewHolder, position: Int) {
-    viewHolder.itemView.textview_to_row.text = text
-  }
-
-  override fun getLayout(): Int {
-    return R.layout.chat_to_row
   }
 }
