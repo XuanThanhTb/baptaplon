@@ -28,7 +28,6 @@ class ChatLogActivity : AppCompatActivity() {
   }
 
   val adapter = GroupAdapter<ViewHolder>()
-
   var toUser: User? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {

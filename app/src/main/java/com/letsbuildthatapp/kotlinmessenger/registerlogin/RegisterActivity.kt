@@ -44,6 +44,7 @@ class RegisterActivity : AppCompatActivity() {
 
       val intent = Intent(Intent.ACTION_PICK)
       intent.type = "image/*"
+        intent.setAction(Intent.ACTION_GET_CONTENT)
       startActivityForResult(intent, 0)
     }
   }
@@ -109,7 +110,6 @@ class RegisterActivity : AppCompatActivity() {
 
           ref.downloadUrl.addOnSuccessListener {
             Log.d(TAG, "File Location: $it")
-
             saveUserToFirebaseDatabase(it.toString())
           }
         }
