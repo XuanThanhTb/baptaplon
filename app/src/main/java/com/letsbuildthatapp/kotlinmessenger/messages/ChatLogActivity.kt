@@ -9,6 +9,8 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -16,6 +18,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.letsbuildthatapp.kotlinmessenger.R
 import com.letsbuildthatapp.kotlinmessenger.models.ChatMessage
 import com.letsbuildthatapp.kotlinmessenger.models.User
+import com.letsbuildthatapp.kotlinmessenger.registerlogin.RegisterActivity
 import com.letsbuildthatapp.kotlinmessenger.views.ChatFromItem
 import com.letsbuildthatapp.kotlinmessenger.views.ChatToItem
 import com.squareup.picasso.Picasso
@@ -25,6 +28,7 @@ import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_chat_log.*
 import kotlinx.android.synthetic.main.chat_from_row.view.*
 import kotlinx.android.synthetic.main.chat_to_row.view.*
+import java.util.*
 
 class ChatLogActivity : AppCompatActivity() {
 
@@ -46,6 +50,7 @@ class ChatLogActivity : AppCompatActivity() {
 
         supportActionBar?.title = toUser?.username
 
+
 //    setupDummyData()
         listenForMessages()
 
@@ -53,6 +58,7 @@ class ChatLogActivity : AppCompatActivity() {
             Log.d(TAG, "Attempt to send message....")
             performSendMessage()
             imageStoreMedia.setImageResource(R.drawable.ic_baseline_image_24)
+            uploadImageToFirebaseStorage()
         }
 
 
@@ -119,15 +125,10 @@ class ChatLogActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GALLERY_INTENT && resultCode == Activity.RESULT_OK && data != null) {
             Log.d("RegisterActivity", "photo  was select")
-
-//      val filePath = FirebaseStorage.getInstance().reference.child("images_mess")
-//              .child(mImageUri.lastPathSegment)
-
             selectedPhotoUri = data.data
-//            performSendMessage(selectedPhotoUri)
-
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
             imageStoreMedia.setImageBitmap(bitmap)
+            
         }
 
     }
@@ -189,4 +190,21 @@ class ChatLogActivity : AppCompatActivity() {
         val latestMessageToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
         latestMessageToRef.setValue(chatMessage)
     }
+    private fun uploadImageToFirebaseStorage() {
+        if (selectedPhotoUri == null) return
+
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+        ref.putFile(selectedPhotoUri!!)
+                .addOnSuccessListener {
+                    Log.d(RegisterActivity.TAG, "Successfully uploaded image: ${it.metadata?.path}")
+
+                }
+                .addOnFailureListener {
+                    Log.d(RegisterActivity.TAG, "Failed to upload image to storage: ${it.message}")
+                }
+    }
+
+
 }

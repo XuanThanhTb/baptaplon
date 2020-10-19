@@ -59,24 +59,13 @@ class ChatFromItem(val activity: Activity, val text: String, val user: User, val
 
 class ChatToItem(val text: String, val user: User) : Item<ViewHolder>() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
-        if (text != "") {
-            viewHolder.itemView.textview_to_row.text = text
-        } else {
-            val uri = user.profileImageUrl
-            val targetImageView = viewHolder.itemView.image_chat_to_row
-            Picasso.get().load(uri).into(targetImageView)
-//      viewHolder.itemView.image_chat_to_row
-        }
-
-        // load our user image into the star
+        viewHolder.itemView.textview_to_row.text = text
         val uri = user.profileImageUrl
         val targetImageView = viewHolder.itemView.imageview_chat_to_row
         Picasso.get().load(uri).into(targetImageView)
-
-
+        // load our user image into the star
     }
-
     override fun getLayout(): Int {
-        return if (text != "") R.layout.chat_to_row else R.layout.chat_to_image_row
+        return R.layout.chat_to_row
     }
 }
