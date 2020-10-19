@@ -1,9 +1,18 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< HEAD
+=======
+    xmlns:tools="http://schemas.android.com/tools"
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24"
+<<<<<<< HEAD
     android:tint="?attr/colorControlNormal">
+=======
+    android:tint="?attr/colorControlNormal"
+    tools:ignore="VectorRaster">
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
   <path
       android:fillColor="@android:color/white"
       android:pathData="M21,19V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2zM8.5,13.5l2.5,3.01L14.5,12l4.5,6H5l3.5,-4.5z"/>

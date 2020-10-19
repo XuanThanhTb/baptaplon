@@ -9,7 +9,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+<<<<<<< HEAD
         <activity android:name=".messages.ShowMenuMessActivity"></activity>
+=======
+        <activity android:name=".messages.ShowDetailImageMessActivity"></activity>
+        <activity android:name=".messages.ShowMenuMessActivity" />
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
         <activity android:name=".messages.LatestMessagesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
