@@ -16,6 +16,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.letsbuildthatapp.kotlinmessenger.R
 import com.letsbuildthatapp.kotlinmessenger.models.ChatMessage
 import com.letsbuildthatapp.kotlinmessenger.models.User
+import com.letsbuildthatapp.kotlinmessenger.registerlogin.RegisterActivity
 import com.letsbuildthatapp.kotlinmessenger.views.ChatFromItem
 import com.letsbuildthatapp.kotlinmessenger.views.ChatToItem
 import com.squareup.picasso.Picasso
@@ -25,6 +26,7 @@ import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_chat_log.*
 import kotlinx.android.synthetic.main.chat_from_row.view.*
 import kotlinx.android.synthetic.main.chat_to_row.view.*
+import java.util.*
 
 class ChatLogActivity : AppCompatActivity() {
 
@@ -66,9 +68,6 @@ class ChatLogActivity : AppCompatActivity() {
     }
 
     var selectedPhotoUri: Uri? = null
-    var mImageUri = Uri.EMPTY
-    var myRef: DatabaseReference? = null
-    var myRef2: DatabaseReference? = null
 
     private fun listenForMessages() {
         val fromId = FirebaseAuth.getInstance().uid
@@ -85,7 +84,7 @@ class ChatLogActivity : AppCompatActivity() {
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
                         val currentUser = LatestMessagesActivity.currentUser ?: return
-                        adapter.add(ChatFromItem(this@ChatLogActivity, chatMessage.text, currentUser, selectedPhotoUri.toString()))
+                        adapter.add(ChatFromItem(this@ChatLogActivity, chatMessage.text, currentUser,  chatMessage.image))
                     } else {
                         adapter.add(ChatToItem(chatMessage.text, toUser!!))
                     }
@@ -188,5 +187,25 @@ class ChatLogActivity : AppCompatActivity() {
 
         val latestMessageToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
         latestMessageToRef.setValue(chatMessage)
+    }
+
+    private fun uploadImageMessToFirebaseStorage(){
+        if (selectedPhotoUri == null) return
+
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+        ref.putFile(selectedPhotoUri!!)
+                .addOnSuccessListener {
+                    Log.d(RegisterActivity.TAG, "Successfully uploaded image: ${it.metadata?.path}")
+
+                    ref.downloadUrl.addOnSuccessListener {
+                        Log.d(RegisterActivity.TAG, "File Location: $it")
+//                        saveUserToFirebaseDatabase(it.toString())
+                    }
+                }
+                .addOnFailureListener {
+                    Log.d(RegisterActivity.TAG, "Failed to upload image to storage: ${it.message}")
+                }
     }
 }
