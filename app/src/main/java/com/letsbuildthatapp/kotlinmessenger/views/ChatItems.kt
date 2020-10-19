@@ -76,9 +76,7 @@ class ChatToItem(val text: String, val user: User) : Item<ViewHolder>() {
         val targetImageView = viewHolder.itemView.imageview_chat_to_row
         Picasso.get().load(uri).into(targetImageView)
         // load our user image into the star
-
     }
-
     override fun getLayout(): Int {
         return R.layout.chat_to_row
     }

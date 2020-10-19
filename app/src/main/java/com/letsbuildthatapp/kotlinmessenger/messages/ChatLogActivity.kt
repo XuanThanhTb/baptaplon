@@ -9,12 +9,15 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.letsbuildthatapp.kotlinmessenger.R
 import com.letsbuildthatapp.kotlinmessenger.models.ChatMessage
+import com.letsbuildthatapp.kotlinmessenger.models.ImageMess
 import com.letsbuildthatapp.kotlinmessenger.models.User
 import com.letsbuildthatapp.kotlinmessenger.registerlogin.RegisterActivity
 import com.letsbuildthatapp.kotlinmessenger.views.ChatFromItem
@@ -24,6 +27,7 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_chat_log.*
+import kotlinx.android.synthetic.main.activity_register.*
 import kotlinx.android.synthetic.main.chat_from_row.view.*
 import kotlinx.android.synthetic.main.chat_to_row.view.*
 import java.util.*
@@ -34,6 +38,9 @@ class ChatLogActivity : AppCompatActivity() {
         val TAG = "ChatLog"
         val GALLERY_INTENT = 2
     }
+
+    var selectedPhotoUri: Uri? = null
+
 
     val adapter = GroupAdapter<ViewHolder>()
     var toUser: User? = null
@@ -48,6 +55,7 @@ class ChatLogActivity : AppCompatActivity() {
 
         supportActionBar?.title = toUser?.username
 
+
 //    setupDummyData()
         listenForMessages()
 
@@ -55,6 +63,7 @@ class ChatLogActivity : AppCompatActivity() {
             Log.d(TAG, "Attempt to send message....")
             performSendMessage()
             imageStoreMedia.setImageResource(R.drawable.ic_baseline_image_24)
+            uploadImageToFirebaseStorage()
         }
 
 
@@ -67,7 +76,6 @@ class ChatLogActivity : AppCompatActivity() {
         }
     }
 
-    var selectedPhotoUri: Uri? = null
 
     private fun listenForMessages() {
         val fromId = FirebaseAuth.getInstance().uid
@@ -84,7 +92,7 @@ class ChatLogActivity : AppCompatActivity() {
 
                     if (chatMessage.fromId == FirebaseAuth.getInstance().uid) {
                         val currentUser = LatestMessagesActivity.currentUser ?: return
-                        adapter.add(ChatFromItem(this@ChatLogActivity, chatMessage.text, currentUser,  chatMessage.image))
+                        adapter.add(ChatFromItem(this@ChatLogActivity, chatMessage.text, currentUser, chatMessage.image))
                     } else {
                         adapter.add(ChatToItem(chatMessage.text, toUser!!))
                     }
@@ -118,15 +126,10 @@ class ChatLogActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GALLERY_INTENT && resultCode == Activity.RESULT_OK && data != null) {
             Log.d("RegisterActivity", "photo  was select")
-
-//      val filePath = FirebaseStorage.getInstance().reference.child("images_mess")
-//              .child(mImageUri.lastPathSegment)
-
             selectedPhotoUri = data.data
-//            performSendMessage(selectedPhotoUri)
-
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
             imageStoreMedia.setImageBitmap(bitmap)
+
         }
 
     }
@@ -189,11 +192,11 @@ class ChatLogActivity : AppCompatActivity() {
         latestMessageToRef.setValue(chatMessage)
     }
 
-    private fun uploadImageMessToFirebaseStorage(){
+    private fun uploadImageToFirebaseStorage() {
         if (selectedPhotoUri == null) return
-
-        val filename = UUID.randomUUID().toString()
-        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+        val fromId = FirebaseAuth.getInstance().uid
+        val toId = toUser?.uid
+        val ref = FirebaseStorage.getInstance().getReference("/images/$toId/$fromId")
 
         ref.putFile(selectedPhotoUri!!)
                 .addOnSuccessListener {
@@ -201,11 +204,35 @@ class ChatLogActivity : AppCompatActivity() {
 
                     ref.downloadUrl.addOnSuccessListener {
                         Log.d(RegisterActivity.TAG, "File Location: $it")
-//                        saveUserToFirebaseDatabase(it.toString())
+                        saveUserToFirebaseDatabase(it.toString())
                     }
                 }
                 .addOnFailureListener {
                     Log.d(RegisterActivity.TAG, "Failed to upload image to storage: ${it.message}")
                 }
     }
+
+    private fun saveUserToFirebaseDatabase(profileImageUrl: String) {
+        val uid = FirebaseAuth.getInstance().uid ?: ""
+        val fromId = FirebaseAuth.getInstance().uid
+        val toId = toUser?.uid
+        val ref = FirebaseDatabase.getInstance().getReference("/images/$toId/$fromId")
+
+//        val user = User(uid, username_edittext_register.text.toString(), profileImageUrl)
+        val imageMess = ImageMess(selectedPhotoUri.toString())
+
+        ref.setValue(imageMess)
+                .addOnSuccessListener {
+                    Log.d(RegisterActivity.TAG, "Finally we saved the user to Firebase Database")
+//
+//                    val intent = Intent(this, LatestMessagesActivity::class.java)
+//                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    startActivity(intent)
+
+                }
+                .addOnFailureListener {
+                    Log.d(RegisterActivity.TAG, "Failed to set value to database: ${it.message}")
+                }
+    }
+
 }
