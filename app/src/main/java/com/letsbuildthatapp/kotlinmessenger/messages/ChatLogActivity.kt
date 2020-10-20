@@ -9,8 +9,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.ImageView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -22,14 +20,9 @@ import com.letsbuildthatapp.kotlinmessenger.models.User
 import com.letsbuildthatapp.kotlinmessenger.registerlogin.RegisterActivity
 import com.letsbuildthatapp.kotlinmessenger.views.ChatFromItem
 import com.letsbuildthatapp.kotlinmessenger.views.ChatToItem
-import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
-import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_chat_log.*
-import kotlinx.android.synthetic.main.activity_register.*
-import kotlinx.android.synthetic.main.chat_from_row.view.*
-import kotlinx.android.synthetic.main.chat_to_row.view.*
 import java.util.*
 
 class ChatLogActivity : AppCompatActivity() {
@@ -61,9 +54,8 @@ class ChatLogActivity : AppCompatActivity() {
 
         send_button_chat_log.setOnClickListener {
             Log.d(TAG, "Attempt to send message....")
-            performSendMessage()
-            imageStoreMedia.setImageResource(R.drawable.ic_baseline_image_24)
-            uploadImageToFirebaseStorage()
+            if (edittext_chat_log.text.toString() == "") uploadImageToFirebaseStorage() else performSendMessage(selectedPhotoUri.toString())
+
         }
 
 
@@ -86,7 +78,7 @@ class ChatLogActivity : AppCompatActivity() {
 
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                 val chatMessage = p0.getValue(ChatMessage::class.java)
-
+                val imageMess = p0.getValue(ImageMess::class.java)
                 if (chatMessage != null) {
                     Log.d(TAG, chatMessage.text)
 
@@ -94,8 +86,13 @@ class ChatLogActivity : AppCompatActivity() {
                         val currentUser = LatestMessagesActivity.currentUser ?: return
                         adapter.add(ChatFromItem(this@ChatLogActivity, chatMessage.text, currentUser, chatMessage.image))
                     } else {
-                        adapter.add(ChatToItem(chatMessage.text, toUser!!))
+                        adapter.add(ChatToItem(this@ChatLogActivity, chatMessage.text, toUser!!, chatMessage.image))
                     }
+                }
+
+                if (imageMess != null) {
+                    Log.d(TAG, imageMess.image)
+//                    if ()
                 }
 
                 recyclerview_chat_log.scrollToPosition(adapter.itemCount - 1)
@@ -157,7 +154,7 @@ class ChatLogActivity : AppCompatActivity() {
     }
 
 
-    private fun performSendMessage() {
+    private fun performSendMessage(profileImageUrl: String) {
         // how do we actually send a message to firebase...
         val text = edittext_chat_log.text.toString()
         val image = selectedPhotoUri.toString()
@@ -174,7 +171,7 @@ class ChatLogActivity : AppCompatActivity() {
 
         val toReference = FirebaseDatabase.getInstance().getReference("/user-messages/$toId/$fromId").push()
 
-        val chatMessage = ChatMessage(reference.key!!, text, fromId, toId, image, System.currentTimeMillis() / 1000)
+        val chatMessage = ChatMessage(reference.key!!, text, fromId, toId, profileImageUrl, System.currentTimeMillis() / 1000)
 
         reference.setValue(chatMessage)
                 .addOnSuccessListener {
@@ -196,7 +193,8 @@ class ChatLogActivity : AppCompatActivity() {
         if (selectedPhotoUri == null) return
         val fromId = FirebaseAuth.getInstance().uid
         val toId = toUser?.uid
-        val ref = FirebaseStorage.getInstance().getReference("/images/$toId/$fromId")
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/imagesmess/$filename")
 
         ref.putFile(selectedPhotoUri!!)
                 .addOnSuccessListener {
@@ -204,7 +202,8 @@ class ChatLogActivity : AppCompatActivity() {
 
                     ref.downloadUrl.addOnSuccessListener {
                         Log.d(RegisterActivity.TAG, "File Location: $it")
-                        saveUserToFirebaseDatabase(it.toString())
+                        performSendMessage(it.toString())
+//                        saveUserToFirebaseDatabase(it.toString())
                     }
                 }
                 .addOnFailureListener {
@@ -212,19 +211,47 @@ class ChatLogActivity : AppCompatActivity() {
                 }
     }
 
+
     private fun saveUserToFirebaseDatabase(profileImageUrl: String) {
+        val uid = FirebaseAuth.getInstance().uid ?: ""
+        val fromId = FirebaseAuth.getInstance().uid
+        val toId = toUser?.uid
+
+
+        val ref = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId/$toId\"")
+
+//        val user = User(uid, username_edittext_register.text.toString(), profileImageUrl)
+        val reference = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId/$toId").push()
+
+        val toReference = FirebaseDatabase.getInstance().getReference("/user-messages/$toId/$fromId").push()
+        val chatMessage = ChatMessage(reference.key!!, "", fromId!!, toId!!, profileImageUrl, System.currentTimeMillis() / 1000)
+        ref.setValue(chatMessage)
+                .addOnSuccessListener {
+                    Log.d(RegisterActivity.TAG, "Finally we saved the user to Firebase Database")
+
+//                    val intent = Intent(this, LatestMessagesActivity::class.java)
+//                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    startActivity(intent)
+
+                }
+                .addOnFailureListener {
+                    Log.d(RegisterActivity.TAG, "Failed to set value to database: ${it.message}")
+                }
+    }
+
+    private fun saveImageoFirebaseDatabase(profileImageUrl: String) {
         val uid = FirebaseAuth.getInstance().uid ?: ""
         val fromId = FirebaseAuth.getInstance().uid
         val toId = toUser?.uid
         val ref = FirebaseDatabase.getInstance().getReference("/images/$toId/$fromId")
 
 //        val user = User(uid, username_edittext_register.text.toString(), profileImageUrl)
-        val imageMess = ImageMess(selectedPhotoUri.toString())
+        val imageMess = ImageMess(profileImageUrl)
 
         ref.setValue(imageMess)
                 .addOnSuccessListener {
                     Log.d(RegisterActivity.TAG, "Finally we saved the user to Firebase Database")
-//
+
 //                    val intent = Intent(this, LatestMessagesActivity::class.java)
 //                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
 //                    startActivity(intent)

@@ -3,6 +3,8 @@ package com.letsbuildthatapp.kotlinmessenger.views
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.ContextCompat.startActivity
 import android.util.Log
@@ -23,6 +25,7 @@ import kotlinx.android.synthetic.main.chat_from_row.view.*
 import kotlinx.android.synthetic.main.chat_from_row.view.imageview_chat_from_row
 import kotlinx.android.synthetic.main.chat_to_image_row.view.*
 import kotlinx.android.synthetic.main.chat_to_row.view.*
+import java.io.File
 import kotlin.coroutines.experimental.coroutineContext
 
 
@@ -36,11 +39,11 @@ class ChatFromItem(val activity: Activity, val text: String, val user: User, val
         } else {
             val targetImageView = viewHolder.itemView.image_from_row
             Log.d("THANH", selectedPhotoUri)
-            Picasso.get().load(user.profileImageUrl).into(targetImageView)
+            Picasso.get().load(selectedPhotoUri).into(targetImageView)
             viewHolder.itemView.image_from_row.setOnClickListener {
-//                Toast.makeText(activity, "SHOW IMAGE", Toast.LENGTH_SHORT).show()
-//                showDialog()
-                val intent = Intent(activity, ShowDetailImageMessActivity::class.java)
+                val intent = Intent(activity, ShowDetailImageMessActivity::class.java).apply {
+                    putExtra("SHOW DETAIL IMAGE", selectedPhotoUri)
+                }
                 activity.startActivity(intent);
             }
         }
@@ -68,16 +71,34 @@ class ChatFromItem(val activity: Activity, val text: String, val user: User, val
     }
 }
 
-class ChatToItem(val text: String, val user: User) : Item<ViewHolder>() {
+class ChatToItem(val activity: Activity, val text: String, val user: User, val selectedPhotoToItem: String) : Item<ViewHolder>() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
-
         viewHolder.itemView.textview_to_row.text = text
         val uri = user.profileImageUrl
         val targetImageView = viewHolder.itemView.imageview_chat_to_row
         Picasso.get().load(uri).into(targetImageView)
+
+
+        if (text != "") {
+            viewHolder.itemView.textview_from_row.text = text
+        } else {
+            //val uriIMage = Uri.fromFile(File(selectedPhotoUri))
+            val imageChatToRow = viewHolder.itemView.image_chat_to_row
+            Log.d("THANH", selectedPhotoToItem)
+            Picasso.get().load(selectedPhotoToItem).into(imageChatToRow)
+            viewHolder.itemView.image_from_row.setOnClickListener {
+                val intent = Intent(activity, ShowDetailImageMessActivity::class.java).apply {
+                    putExtra("SHOW DETAIL IMAGE", selectedPhotoToItem)
+                }
+                activity.startActivity(intent);
+            }
+        }
+
+
         // load our user image into the star
     }
+
     override fun getLayout(): Int {
-        return R.layout.chat_to_row
+        return if (text != "") R.layout.chat_to_row else R.layout.chat_to_image_row
     }
 }
