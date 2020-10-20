@@ -3,11 +3,14 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+<<<<<<< HEAD
+=======
         <entry key="imageWizard">
           <value>
             <PersistentState />
           </value>
         </entry>
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -23,7 +26,11 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
+<<<<<<< HEAD
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio1/plugins/android/lib/android.jar!/images/material/icons/materialicons/image/baseline_image_24.xml" />
+=======
                                       <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio1/plugins/android/lib/android.jar!/images/material/icons/materialicons/clear/baseline_clear_24.xml" />
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,8 +40,13 @@
                         </option>
                         <option name="values">
                           <map>
+<<<<<<< HEAD
+                            <entry key="outputName" value="ic_baseline_image_24" />
+                            <entry key="sourceFile" value="C:\Users\xuan thanh\Desktop\messs" />
+=======
                             <entry key="outputName" value="ic_baseline_clear_24" />
                             <entry key="sourceFile" value="C:\Users\xuan thanh\Desktop\btap" />
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
                           </map>
                         </option>
                       </PersistentState>

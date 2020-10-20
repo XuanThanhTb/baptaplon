@@ -15,7 +15,10 @@
         android:layout_marginLeft="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/edittext_chat_log"
         app:layout_constraintStart_toStartOf="parent"
+<<<<<<< HEAD
+=======
         app:layout_constraintTop_toTopOf="@+id/edittext_chat_log"
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
         app:srcCompat="@drawable/ic_baseline_image_24"
         tools:ignore="VectorDrawableCompat" />
 

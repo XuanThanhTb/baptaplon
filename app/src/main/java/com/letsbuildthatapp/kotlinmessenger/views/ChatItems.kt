@@ -29,6 +29,32 @@ import java.io.File
 import kotlin.coroutines.experimental.coroutineContext
 
 
+<<<<<<< HEAD
+class ChatFromItem(val text: String, val user: User) : Item<ViewHolder>() {
+    override fun bind(viewHolder: ViewHolder, position: Int) {
+        viewHolder.itemView.textview_from_row.text = text
+
+        val uri = user.profileImageUrl
+        val targetImageView = viewHolder.itemView.imageview_chat_from_row
+        Picasso.get().load(uri).into(targetImageView)
+    }
+
+    override fun getLayout(): Int {
+        return R.layout.chat_from_row
+    }
+}
+
+class ChatToItem(val text: String, val user: User) : Item<ViewHolder>() {
+    override fun bind(viewHolder: ViewHolder, position: Int) {
+        viewHolder.itemView.textview_to_row.text = text
+
+        // load our user image into the star
+        val uri = user.profileImageUrl
+        val targetImageView = viewHolder.itemView.imageview_chat_to_row
+        Picasso.get().load(uri).into(targetImageView)
+    }
+
+=======
 class ChatFromItem(val activity: Activity, val text: String, val user: User, val selectedPhotoUri: String) : Item<ViewHolder>() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
 
@@ -97,7 +123,11 @@ class ChatToItem(val activity: Activity, val text: String, val user: User, val s
 
         // load our user image into the star
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 53a1aca7b3bb1114b765ba07a53d341d34319c6d
+>>>>>>> 91b4e712f84af8775fd3ccfb659670b7ed408d0f
     override fun getLayout(): Int {
         return if (text != "") R.layout.chat_to_row else R.layout.chat_to_image_row
     }
